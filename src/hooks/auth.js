@@ -15,7 +15,8 @@ const useAuth = () => {
           {
             email,
             password,
-          }
+          },
+          { withCredentials: true }
         );
         await console.log("result", result);
         // if(){
