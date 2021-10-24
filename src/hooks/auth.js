@@ -1,15 +1,24 @@
 import * as React from "react";
 import axios from "axios";
+import { useStore } from "../store";
+import shallow from "zustand/shallow";
 
 // https://ui.dev/react-router-protected-routes-authentication/
-const authContext = React.createContext();
 
 const useAuth = () => {
-  const [authed, setAuthed] = React.useState(false);
+  const { setAuthed, setLoading, setMe } = useStore(
+    (state) => ({
+      // ...state,
+      setAuthed: state.setAuthed,
+      setLoading: state.setLoading,
+      setMe: state.setMe,
+    }),
+    shallow
+  );
   return {
-    authed,
-    login({ email, password }) {
-      return (async () => {
+    async login({ email, password }) {
+      try {
+        setLoading(true);
         const result = await axios.post(
           `${process.env.REACT_APP_API_ROOT_URL}/operators/login`,
           {
@@ -18,14 +27,18 @@ const useAuth = () => {
           },
           { withCredentials: true }
         );
-        await console.log("result", result);
-        // if(){
-        //   setAuthed(true)
-        // }
-      })().catch((e) => {
-        setAuthed(true);
-        console.log("Caught: " + e);
-      });
+        setLoading(false);
+        if (result?.data?.status === "success") {
+          setAuthed(true);
+          setMe(result.data.data.operator);
+          return true;
+        }
+      } catch (error) {
+        setLoading(false);
+        setAuthed(false);
+        console.log("Caught: " + error);
+        return false;
+      }
     },
     logout() {
       return new Promise((res) => {
@@ -36,13 +49,4 @@ const useAuth = () => {
   };
 };
 
-const AuthProvider = ({ children }) => {
-  const auth = useAuth();
-  return <authContext.Provider value={auth}>{children}</authContext.Provider>;
-};
-
-const AuthConsumer = () => {
-  return React.useContext(authContext);
-};
-
-export default { AuthConsumer, AuthProvider };
+export default useAuth;

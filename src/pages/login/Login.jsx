@@ -3,27 +3,45 @@ import { Form, Input, Button, Row, Col, Card } from "antd";
 import useSWR from "swr";
 import { useForm, Controller } from "react-hook-form";
 import useAuth from "../../hooks/auth";
+import { useStore } from "../../store";
+import shallow from "zustand/shallow";
+import { validateEmail } from "../../utils";
 
 import styles from "./Login.module.less";
 
 const Login = () => {
-  // rhf
+  const { login } = useAuth();
   const {
     handleSubmit,
     watch,
     control,
     formState: { errors },
+    setError,
+    clearErrors,
   } = useForm();
-  const onSubmit = (data) => {
-    login(data);
+  
+  const onSubmit = async (data) => {
+    const authResult = await login(data);
+    if (!authResult) {
+      setError("email");
+      setError("password");
+      setTimeout(() => {
+        clearErrors();
+      }, 700);
+    }
   };
-  const { AuthConsumer } = useAuth;
-  const { authed, login } = AuthConsumer();
+
+  const { loading } = useStore(
+    (state) => ({
+      loading: state.loading,
+    }),
+    shallow
+  );
 
   return (
     <Row justify="center" type="flex" align="middle" className={styles.form}>
       <Col>
-        <Card style={{ width: 300 }}>
+        <Card style={{ width: 300 }} bordered={false}>
           <Form
             // className={styles.debug}
             // labelCol={{
@@ -37,13 +55,13 @@ const Login = () => {
             }}
             onSubmit={handleSubmit(onSubmit)}
           >
-            <Form.Item {...(errors?.name && { validateStatus: "error" })}>
+            <Form.Item {...(errors?.email && { validateStatus: "error" })}>
               <Controller
                 name="email"
                 control={control}
-                rules={{ required: true }}
+                rules={{ required: true, validate: validateEmail }}
                 defaultValue=""
-                render={({ field }) => <Input placeholder="email" {...field} />}
+                render={({ field }) => <Input placeholder="Email" {...field} />}
               />
             </Form.Item>
 
@@ -54,7 +72,11 @@ const Login = () => {
                 rules={{ required: true }}
                 defaultValue=""
                 render={({ field }) => (
-                  <Input.Password placeholder="password" {...field} />
+                  <Input.Password
+                    onPressEnter={handleSubmit(onSubmit)}
+                    placeholder="Password"
+                    {...field}
+                  />
                 )}
               />
             </Form.Item>
@@ -65,8 +87,12 @@ const Login = () => {
             //     span: 16,
             //   }}
             >
-              <Button type="primary" onClick={handleSubmit(onSubmit)}>
-                Submit
+              <Button
+                type="primary"
+                loading={loading}
+                onClick={handleSubmit(onSubmit)}
+              >
+                ➔
               </Button>
             </Form.Item>
           </Form>
