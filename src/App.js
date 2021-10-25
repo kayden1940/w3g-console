@@ -18,7 +18,7 @@ import Operators from "./pages/operators/Operators";
 import Guests from "./pages/guests/Guests";
 import Tasks from "./pages/tasks/Tasks";
 
-import Sites from "./pages/sites/Sites";
+import Sites from "./pages/sites/list/Sites";
 import SiteCreate from "./pages/sites/create/SiteCreate";
 
 export const PublicRoute = ({ ...props }) => {
@@ -71,7 +71,6 @@ const App = () => {
                 </>
               )}
             />
-
             <PrivateRoute
               path="/tasks"
               render={({ match: { url } }) => (
