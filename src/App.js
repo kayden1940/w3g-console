@@ -62,7 +62,7 @@ const App = () => {
             <PrivateRoute exact path="/">
               <Dashboard />
             </PrivateRoute>
-            <PrivateRoute
+            <Route
               path="/sites"
               render={({ match: { url } }) => (
                 <>

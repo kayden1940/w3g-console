@@ -1,11 +1,15 @@
 import useSWR from "swr";
-const fetcher = (...args) => fetch(...args).then((res) => res.json());
+import { useStoreProps } from "../hooks/store";
 
-const useSites = (id) => {
+const useSites = () => {
+  const { setSites } = useStoreProps(["setSites"]);
+  // fetch site data and store them.
   const { data, error } = useSWR(
     `${process.env.REACT_APP_API_ROOT_URL}/sites`,
-    fetcher
+    (...args) => fetch(...args).then((res) => res.json())
   );
+
+  setSites(data);
 
   return {
     sitesData: data,

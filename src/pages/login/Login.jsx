@@ -19,9 +19,10 @@ const Login = () => {
     setError,
     clearErrors,
   } = useForm();
-  
+
   const onSubmit = async (data) => {
     const authResult = await login(data);
+    console.log("authResult", authResult);
     if (!authResult) {
       setError("email");
       setError("password");

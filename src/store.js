@@ -1,10 +1,12 @@
 import create from "zustand";
 
 export const useStore = create((set) => ({
-  // bears: 0,
   authed: false,
   loading: false,
   me: null,
+
+  sites: [],
+  tasks: [],
 
   // actions
   // increasePopulation: () => set((state) => ({ bears: state.bears + 1 })),
@@ -12,4 +14,7 @@ export const useStore = create((set) => ({
   setAuthed: (authed) => set(() => ({ authed })),
   setLoading: (loading) => set(() => ({ loading })),
   setMe: (me) => set(() => ({ me })),
+
+  setSites: (sites) => set(() => ({ sites })),
+  setTasks: (tasks) => set(() => ({ tasks })),
 }));

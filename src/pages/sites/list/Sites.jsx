@@ -1,13 +1,12 @@
 import React from "react";
-import { useSites } from "../../../hooks/apis";
-import { List, Space, Row, Col, Tag } from "antd";
+import { List, Space, Row, Col } from "antd";
 import { HeartOutlined, FileTextOutlined } from "@ant-design/icons";
 import styles from "./Sites.module.less";
 import Filter from "./components/Filter";
+// import { useSites } from "../../../hooks/apis";
+import { useStoreProps } from "../../../hooks/store";
 
 const Sites = () => {
-  const { sitesData, isLoading, isError } = useSites();
-  const { CheckableTag } = Tag;
   const listData = [];
   for (let i = 0; i < 23; i++) {
     listData.push({
@@ -28,13 +27,15 @@ const Sites = () => {
     </Space>
   );
 
+const sites = useStoreProps(["sites"]);
+
   return (
     <>
       <Row justify="center" gutter={[16, 16]}>
-        <Col span={16} >
-          <Filter/>
+        <Col span={16} className={styles.debug}>
+          <Filter />
         </Col>
-        <Col span={16} >
+        <Col span={16} className={styles.debug}>
           <List
             itemLayout="vertical"
             size="large"
