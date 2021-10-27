@@ -87,6 +87,7 @@ const TopicFilter = ({ selectedTopics, setSelectedTopics }) => {
     </>
   );
 };
+
 const LanguageFilter = ({ selectedTopics, setSelectedTopics }) => {
   const { CheckableTag } = Tag;
   // FIXME: tagsData should fetch from apis, and now that the data from apis are needed from everywhere, gonna store the results to global state.
