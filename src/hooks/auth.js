@@ -30,7 +30,7 @@ const useAuth = () => {
         setLoading(false);
         if (result?.data?.status === "success") {
           setAuthed(true);
-          setMe(result.data.data.operator);
+          setMe(result.data);
           return true;
         }
       } catch (error) {

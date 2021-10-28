@@ -13,7 +13,6 @@ const Login = () => {
   const { login } = useAuth();
   const {
     handleSubmit,
-    watch,
     control,
     formState: { errors },
     setError,
@@ -22,7 +21,6 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     const authResult = await login(data);
-    console.log("authResult", authResult);
     if (!authResult) {
       setError("email");
       setError("password");
