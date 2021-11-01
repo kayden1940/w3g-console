@@ -11,7 +11,7 @@ import {
 } from "react-router-dom";
 import { useStore } from "./store";
 import shallow from "zustand/shallow";
-import Layout from "./components/layout/Layout";
+import AppLayout from "./components/layout/AppLayout";
 import Login from "./pages/login/Login";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Operators from "./pages/operators/Operators";
@@ -57,8 +57,8 @@ const App = () => {
         <PublicRoute path="/login">
           <Login />
         </PublicRoute>
-        <Layout>
-          <Switch>
+        <Switch>
+          <AppLayout>
             <PrivateRoute exact path="/">
               <Dashboard />
             </PrivateRoute>
@@ -67,7 +67,14 @@ const App = () => {
               render={({ match: { url } }) => (
                 <>
                   <Route path={`${url}/`} component={Sites} exact />
-                  <Route path={`${url}/create`} component={SiteCreate} />
+                  <Switch>
+                    <Route
+                      path={`${url}/create`}
+                      component={SiteCreate}
+                      exact
+                    />
+                    <Route path={`${url}/:id`} component={SiteCreate} exact />
+                  </Switch>
                 </>
               )}
             />
@@ -98,8 +105,8 @@ const App = () => {
                 </>
               )}
             />
-          </Switch>
-        </Layout>
+          </AppLayout>
+        </Switch>
       </Router>
     </div>
   );

@@ -1,26 +1,19 @@
 import React, { useState } from "react";
-import { List, Space, Row, Col } from "antd";
+import { List, Space, Row, Col, Card, Button } from "antd";
 import { HeartOutlined, FileTextOutlined } from "@ant-design/icons";
 import styles from "./Sites.module.less";
 import Filter from "./components/Filter";
-// import { useSites } from "../../../hooks/apis";
+import { useSites } from "../../../hooks/apis";
 import { useStoreProps } from "../../../hooks/store";
+import { useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const Sites = () => {
   const { sites } = useStoreProps(["sites"]);
   // const [siteList, setSiteList] = useState([]);
-
-  // for (let i = 0; i < 23; i++) {
-  //   listData.push({
-  //     href: "https://ant.design",
-  //     title: `ant design part ${i}`,
-  //     avatar: "https://joeschmoe.io/api/v1/random",
-  //     description:
-  //       "Ant Design, a design language for background applications, is refined by Ant UED Team.",
-  //     content:
-  //       "We supply a series of design principles, practical patterns and high quality design resources (Sketch and Axure), to help people create their product prototypes beautifully and efficiently.",
-  //   });
-  // }
+  const history = useHistory();
+  const { sitesData } = useSites();
+  const siteList = sitesData?.data?.data ?? [];
 
   const IconText = ({ icon, text }) => (
     <Space>
@@ -44,42 +37,54 @@ const Sites = () => {
           //   },
           //   pageSize: 3,
           // }}
-          dataSource={sites}
+          dataSource={siteList}
           // footer={
           //   <div>
           //     <b>ant design</b> footer part
           //   </div>
           // }
-          renderItem={(item) => (
-            <List.Item
-              key={item.title}
-              actions={[
-                <IconText
-                  icon={HeartOutlined}
-                  text="156"
-                  key="list-vertical-star-o"
-                />,
-                <IconText
-                  icon={FileTextOutlined}
-                  text="2"
-                  key="list-vertical-message"
-                />,
-              ]}
-              extra={
-                <img
-                  width={272}
-                  alt="logo"
-                  src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
+          renderItem={(site) => (
+            <Card>
+              <List.Item
+                key={site.slug}
+                actions={[
+                  <Button
+                    onClick={() => {
+                      history.push(`/sites/${site._id}`, { siteId: site._id });
+                    }}
+                  >
+                    Edit
+                  </Button>,
+                  <IconText
+                    icon={HeartOutlined}
+                    text="156"
+                    key="list-vertical-star-o"
+                  />,
+                  // <IconText
+                  //   icon={FileTextOutlined}
+                  //   text="2"
+                  //   key="list-vertical-message"
+                  // />,
+                ]}
+                extra={
+                  <img
+                    width={272}
+                    alt="logo"
+                    src={`${process.env.REACT_APP_API_ROOT_URL}/images/sites/${site.imageCover}`}
+                  />
+                }
+              >
+                <List.Item.Meta
+                  // avatar={<Avatar src={site.avatar} />}
+                  title={
+                    <a href={site.url} target="_blank">
+                      {site.name.en}
+                    </a>
+                  }
+                  description={site.description}
                 />
-              }
-            >
-              <List.Item.Meta
-                // avatar={<Avatar src={item.avatar} />}
-                title={<a href={item.href}>{item.title}</a>}
-                description={item.description}
-              />
-              {item.content}
-            </List.Item>
+              </List.Item>
+            </Card>
           )}
         />
       </Col>

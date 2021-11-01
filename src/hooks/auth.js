@@ -20,7 +20,7 @@ const useAuth = () => {
       try {
         setLoading(true);
         const result = await axios.post(
-          `${process.env.REACT_APP_API_ROOT_URL}/operators/login`,
+          `${process.env.REACT_APP_API_ROOT_URL}/api/v1/operators/login`,
           {
             email,
             password,

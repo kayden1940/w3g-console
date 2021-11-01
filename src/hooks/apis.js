@@ -6,7 +6,7 @@ const useSites = () => {
   const { setSites } = useStoreProps(["setSites"]);
   // fetch site data and store them.
   const { data, error } = useSWR(
-    `${process.env.REACT_APP_API_ROOT_URL}/sites`,
+    `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites`,
     (...args) => fetch(...args).then((res) => res.json())
   );
 

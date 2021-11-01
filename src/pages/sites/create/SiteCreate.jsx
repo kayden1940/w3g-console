@@ -11,16 +11,21 @@ import {
   Select,
   Divider,
   Image,
+  message,
+  Upload,
 } from "antd";
-// import useSWR from "swr";
-import { PlusOutlined } from "@ant-design/icons";
+import { useLocation } from "react-router-dom";
+import useSWR from "swr";
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { useForm, Controller } from "react-hook-form";
 import { useStoreProps } from "../../../hooks/store";
+import { jsonToFormData } from "../../../utils";
 // import useAuth from "../../hooks/auth";
 // import { useStore } from "../../store";
 // import shallow from "zustand/shallow";
 // import { validateEmail } from "../../utils";
 import styles from "../../login/Login.module.less";
+import { useHistory } from "react-router-dom";
 import axios from "axios";
 
 const SiteCreate = () => {
@@ -35,9 +40,22 @@ const SiteCreate = () => {
     setError,
     clearErrors,
   } = useForm();
-  const { CheckableTag } = Tag;
+  // const { CheckableTag } = Tag;
   const { TextArea } = Input;
   const { Option } = Select;
+  const location = useLocation();
+  console.log("location", location.state.siteId);
+
+  const { data, error } = useSWR(
+    `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites/${location.state.siteId}`,
+    (...args) => fetch(...args).then((res) => res.json())
+  );
+
+  console.log("data", data);
+
+  // if (!location.pathname.includes("create")) {
+
+  // }
 
   const purposeTags = [
     "portfolio",
@@ -90,31 +108,57 @@ const SiteCreate = () => {
     "payOnly",
   ];
   const warningOptions = ["flashing", "adult", "nsfw"];
+  const history = useHistory();
 
-  const siteCreate = async (args) => {
+  const siteCreate = async (fData) => {
     try {
-      console.log("me", me);
-      const createResult = await axios.post(
-        `${process.env.REACT_APP_API_ROOT_URL}/sites`,
-        args,
-        {
-          headers: {
-            authorization: `Bearer ${me.token}`,
-          },
-        }
-      );
-      console.log("createResult", createResult);
+      message.loading({ content: "Creating...", key: "createResult" });
+      const options = {
+        method: "POST",
+        headers: {
+          "content-Type": "multipart/form-data",
+          authorization: `Bearer ${me.token}`,
+        },
+        data: fData,
+        url: `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites`,
+      };
+      const createResult = await axios(options);
+      if (createResult?.data?.status === "success") {
+        message.success({
+          content: "Created!",
+          key: "createResult",
+        });
+        setTimeout(() => {
+          history.push("/sites");
+        }, 1000);
+      }
     } catch (error) {
-      console.error(error);
+      message.error({
+        content: `Erorr! ${error}`,
+        key: "createResult",
+      });
     }
   };
 
   const onSubmit = (data, e) => {
-    siteCreate(data);
+    data.created = {
+      at: Date.now(),
+      by: me.data.operator._id,
+    };
+
+    const formData = jsonToFormData(data);
+    console.log("formData", formData);
+
+    siteCreate(formData);
   };
 
   const [items, setItems] = useState([]);
   const [name, setName] = useState("");
+
+  const loading = false;
+  const imageUrl = "https://i.postimg.cc/kMjj7Zpj/FC7-DCWna-UAA8-O6o.jpg";
+
+  console.log("watch", watch());
 
   return (
     <Form
@@ -237,8 +281,8 @@ const SiteCreate = () => {
                   message: "This field need to be at least 17 letter long",
                 },
                 maxLength: {
-                  value: 80,
-                  message: "This field need to be at most 80 letter long",
+                  value: 250,
+                  message: "This field need to be at most 250 letter long",
                 },
               }}
               defaultValue=""
@@ -300,13 +344,38 @@ const SiteCreate = () => {
               )}
             />
           </Form.Item>
-          {/* <Form.Item label="Cover">
-    <Image
-      width={100}
-      height={100}
-      src="https://zos.alipayobjects.com/rmsportal/jkjgkEfvpUPVyRjUImniVslZfWPnJuuZ.png"
-    />
-  </Form.Item> */}
+          <Form.Item label="Cover">
+            <Controller
+              name="imageCover"
+              control={control}
+              render={({ field }) => {
+                // console.log("field", field);
+                return (
+                  <Upload
+                    {...field}
+                    listType="picture-card"
+                    showUploadList={false}
+                    maxCount={1}
+                    customRequest={() => {}}
+                    onChange={(e) => field.onChange(e.file.originFileObj)}
+                  >
+                    {/* {imageUrl ? (
+                      <img
+                        src={imageUrl}
+                        // alt=""
+                        style={{ width: "100%" }}
+                      />
+                    ) : ( */}
+                    <div>
+                      {/* {loading ? <LoadingOutlined /> : <PlusOutlined />} */}
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                    {/* )} */}
+                  </Upload>
+                );
+              }}
+            />
+          </Form.Item>
         </Col>
         <Col style={{ width: "45%" }}>
           <Divider orientation="left">Meta</Divider>
@@ -425,25 +494,25 @@ const SiteCreate = () => {
             />
           </Form.Item>
           {/* <Form.Item label="Warnings">
-            <Controller
-              name="warnings"
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  mode="tags"
-                  // style={{ width: "100%" }}
-                  // onChange={handleChange}
-                  tokenSeparators={[","]}
-                >
-                  {warningOptions.map((tag, i) => (
-                    <Option key={tag}>{tag}</Option>
-                  ))}
-                </Select>
-              )}
-            />
-          </Form.Item> */}
+  <Controller
+    name="warnings"
+    control={control}
+    defaultValue={[]}
+    render={({ field }) => (
+      <Select
+        {...field}
+        mode="tags"
+        // style={{ width: "100%" }}
+        // onChange={handleChange}
+        tokenSeparators={[","]}
+      >
+        {warningOptions.map((tag, i) => (
+          <Option key={tag}>{tag}</Option>
+        ))}
+      </Select>
+    )}
+  />
+</Form.Item> */}
           <Form.Item label="Owner">
             <Controller
               name="owner.name"
@@ -492,16 +561,16 @@ const SiteCreate = () => {
                           )}
                         />
                         {/* <a
-                  style={{
-                    flex: "none",
-                    padding: "8px",
-                    display: "block",
-                    cursor: "pointer",
-                  }}
-                  // onClick={this.addItem}
-                >
-                  <PlusOutlined /> Add location
-                </a> */}
+        style={{
+          flex: "none",
+          padding: "8px",
+          display: "block",
+          cursor: "pointer",
+        }}
+        // onClick={this.addItem}
+      >
+        <PlusOutlined /> Add location
+      </a> */}
                       </div>
                     </div>
                   )}

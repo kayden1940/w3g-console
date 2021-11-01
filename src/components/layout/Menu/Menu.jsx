@@ -17,7 +17,8 @@ const Menu = () => {
     <AntdMenu
       selectable={false}
       // className={styles.debug}
-      style={{ height: "100vh" }}
+      style={{ height: "100%", position: "fixed" }}
+      // theme="dark"
       // defaultSelectedKeys={["1"]}
       // defaultOpenKeys={["sub1"]}
     >
