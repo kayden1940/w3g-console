@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   Form,
   Input,
@@ -11,15 +11,17 @@ import {
   Select,
   Divider,
   Image,
+  Space,
   message,
   Upload,
+  Popover,
 } from "antd";
 import { useLocation } from "react-router-dom";
-import useSWR from "swr";
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { useStats } from "../../../hooks/apis";
+// import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { useForm, Controller } from "react-hook-form";
 import { useStoreProps } from "../../../hooks/store";
-import { jsonToFormData } from "../../../utils";
+import { jsonToFormData, fileToBase64, base64ToFile } from "../../../utils";
 // import useAuth from "../../hooks/auth";
 // import { useStore } from "../../store";
 // import shallow from "zustand/shallow";
@@ -29,9 +31,11 @@ import { useHistory } from "react-router-dom";
 import axios from "axios";
 
 const SiteCreate = () => {
+  const { data: statsData } = useStats();
   const { me } = useStoreProps(["me"]);
   const [selectedPurposes, setSelectedPurposes] = useState([]);
   const [selectedTopics, setSelectedTopics] = useState([]);
+  const [visible, setVisible] = useState(false);
   const {
     handleSubmit,
     watch,
@@ -39,50 +43,42 @@ const SiteCreate = () => {
     formState: { errors },
     setError,
     clearErrors,
+    reset,
+    setValue,
   } = useForm();
-  // const { CheckableTag } = Tag;
+
   const { TextArea } = Input;
   const { Option } = Select;
   const location = useLocation();
-  console.log("location", location.state.siteId);
+  const { data } = useStats();
+  const siteId = location.state?.siteId;
 
-  const { data, error } = useSWR(
-    `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites/${location.state.siteId}`,
-    (...args) => fetch(...args).then((res) => res.json())
-  );
+  const [fetchedSite, setFetchedSite] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  console.log("data", data);
+  useEffect(async () => {
+    if (siteId) {
+      const result = await fetchSite(siteId);
+      setFetchedSite(result);
+    }
+  }, []);
 
-  // if (!location.pathname.includes("create")) {
-
-  // }
-
-  const purposeTags = [
-    "portfolio",
-    "leaflet",
-    "playground",
-    "game",
-    "artwork",
-    "blog",
-    "mystery",
-    "service",
-    "sns",
-    "tool",
-    "resource",
-    "tutorial",
-    "unknown",
-  ];
-  const topicTags = [
-    "music",
-    "design",
-    "web",
-    "graphic",
-    "computerScience",
-    "science",
-    "math",
-    "editing",
-    "cookery",
-  ];
+  useEffect(() => {
+    if (!!fetchedSite) {
+      reset({
+        ...fetchedSite,
+        ...(fetchedSite?.imageCover &&
+          !`${process.env.REACT_APP_API_ROOT_URL}`.includes(
+            fetchedSite?.imageCover
+          ) && {
+            imageCover: `${process.env.REACT_APP_API_ROOT_URL}/images/sites/${fetchedSite.imageCover}`,
+          }),
+      });
+    }
+  }, [fetchedSite]);
+  const purposeTags =
+    statsData?.sites?.purposes?.map(({ _id }) => `${_id}`) ?? [];
+  const topicTags = statsData?.sites?.topics?.map(({ _id }) => `${_id}`) ?? [];
   const languageTags = [
     "English",
     "Tranditional Chinese",
@@ -108,9 +104,11 @@ const SiteCreate = () => {
     "payOnly",
   ];
   const warningOptions = ["flashing", "adult", "nsfw"];
+
   const history = useHistory();
 
   const siteCreate = async (fData) => {
+    setLoading(true);
     try {
       message.loading({ content: "Creating...", key: "createResult" });
       const options = {
@@ -124,15 +122,17 @@ const SiteCreate = () => {
       };
       const createResult = await axios(options);
       if (createResult?.data?.status === "success") {
+        setLoading(false);
         message.success({
           content: "Created!",
           key: "createResult",
         });
         setTimeout(() => {
           history.push("/sites");
-        }, 1000);
+        }, 250);
       }
     } catch (error) {
+      setLoading(false);
       message.error({
         content: `Erorr! ${error}`,
         key: "createResult",
@@ -140,25 +140,116 @@ const SiteCreate = () => {
     }
   };
 
-  const onSubmit = (data, e) => {
+  const siteEdit = async (fData) => {
+    setLoading(true);
+    try {
+      message.loading({ content: "Editing...", key: "editSpinner" });
+      const options = {
+        method: "PATCH",
+        headers: {
+          "content-Type": "multipart/form-data",
+          authorization: `Bearer ${me.token}`,
+        },
+        data: fData,
+        url: `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites/${siteId}`,
+      };
+      const editResult = await axios(options);
+      if (editResult?.data?.status === "success") {
+        setLoading(false);
+        message.success({
+          content: "Edited!",
+          key: "editSpinner",
+        });
+        setTimeout(() => {
+          history.push("/sites");
+        }, 250);
+      }
+    } catch (error) {
+      setLoading(false);
+      message.error({
+        content: `Erorr! ${error}`,
+        key: "editSpinner",
+      });
+    }
+  };
+
+  const siteRemove = async () => {
+    setLoading(true);
+    try {
+      message.loading({ content: "Removing...", key: "removeSpinner" });
+      const options = {
+        method: "DELETE",
+        headers: {
+          authorization: `Bearer ${me.token}`,
+        },
+        url: `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites/${siteId}`,
+      };
+      const removeResult = await axios(options);
+      console.log("removeResult", removeResult);
+      if (removeResult?.status.toString().startsWith("2")) {
+        setLoading(false);
+        message.success({
+          content: "Removed!",
+          key: "removeSpinner",
+        });
+        setTimeout(() => {
+          history.push("/sites");
+        }, 250);
+      }
+    } catch (error) {
+      setLoading(false);
+      message.error({
+        content: `Erorr! ${error}`,
+        key: "removeSpinner",
+      });
+    }
+  };
+
+  const onSubmit = async (data, e) => {
     data.created = {
       at: Date.now(),
       by: me.data.operator._id,
     };
 
+    if (
+      data?.imageCover &&
+      !`${process.env.REACT_APP_API_ROOT_URL}`.includes(data.imageCover)
+    ) {
+      data.imageCover = await base64ToFile(data.imageCover);
+    }
     const formData = jsonToFormData(data);
-    console.log("formData", formData);
-
-    siteCreate(formData);
+    if (siteId) {
+      siteEdit(formData);
+    } else {
+      siteCreate(formData);
+    }
   };
 
-  const [items, setItems] = useState([]);
-  const [name, setName] = useState("");
+  const fetchSite = async (siteId) => {
+    setLoading(true);
+    try {
+      const options = {
+        method: "GET",
+        headers: {
+          authorization: `Bearer ${me.token}`,
+        },
+        url: `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites/${siteId}`,
+      };
+      const createResult = await axios(options);
+      if (createResult) {
+        setLoading(false);
+        return createResult?.data?.data?.data;
+      }
+    } catch (err) {
+      setLoading(false);
+      console.error(err);
+    }
+  };
 
-  const loading = false;
-  const imageUrl = "https://i.postimg.cc/kMjj7Zpj/FC7-DCWna-UAA8-O6o.jpg";
-
-  console.log("watch", watch());
+  // useEffect(() => {
+  //   console.log("watch()", watch());
+  //   console.log("errors", errors);
+  // }, [watch(), errors]);
 
   return (
     <Form
@@ -201,10 +292,26 @@ const SiteCreate = () => {
             />
           </Form.Item>
 
-          <Form.Item label="Original name">
+          <Form.Item
+            label="Original name"
+            {...(errors?.name?.original && {
+              validateStatus: "error",
+              help: errors?.name?.original?.message,
+            })}
+          >
             <Controller
               name="name.original"
               control={control}
+              rules={{
+                minLength: {
+                  value: 3,
+                  message: "This field need to be at least 3 letter long",
+                },
+                maxLength: {
+                  value: 30,
+                  message: "This field need to be at most 30 letter long",
+                },
+              }}
               defaultValue=""
               render={({ field }) => (
                 <Input
@@ -246,7 +353,7 @@ const SiteCreate = () => {
             <Controller
               name="languages"
               control={control}
-              rules={{ required: `This field is required` }}
+              // rules={{ required: `This field is required` }}
               defaultValue={["English"]}
               render={({ field }) => (
                 <Select
@@ -344,12 +451,29 @@ const SiteCreate = () => {
               )}
             />
           </Form.Item>
-          <Form.Item label="Cover">
+          <Form.Item
+            label="Cover"
+            required={true}
+            {...(errors?.imageCover && {
+              validateStatus: "error",
+              help: errors?.imageCover?.message,
+            })}
+          >
             <Controller
               name="imageCover"
+              rules={{
+                required: `This field is required`,
+              }}
               control={control}
               render={({ field }) => {
-                // console.log("field", field);
+                // if (typeof watch("imageCover") == "object") {
+                //   const result = await fileToBase64(
+                //     watch("imageCover").file.originFileObj
+                //   );
+                //   await setValue("imageCover", "result");
+                //   await console.log("result", result);
+                //   await console.log("settedValue", watch("imageCover"));
+                // }
                 return (
                   <Upload
                     {...field}
@@ -357,20 +481,20 @@ const SiteCreate = () => {
                     showUploadList={false}
                     maxCount={1}
                     customRequest={() => {}}
-                    onChange={(e) => field.onChange(e.file.originFileObj)}
+                    onChange={async (e) => {
+                      const eResult = await fileToBase64(e.file.originFileObj);
+                      // console.log("eResult", eResult);
+                      return field.onChange(eResult);
+                    }}
                   >
-                    {/* {imageUrl ? (
-                      <img
-                        src={imageUrl}
-                        // alt=""
-                        style={{ width: "100%" }}
-                      />
-                    ) : ( */}
-                    <div>
-                      {/* {loading ? <LoadingOutlined /> : <PlusOutlined />} */}
-                      <div style={{ marginTop: 8 }}>Upload</div>
-                    </div>
-                    {/* )} */}
+                    {field.value ? (
+                      <img src={field.value} style={{ width: "100%" }} />
+                    ) : (
+                      <div>
+                        {/* {loading ? <LoadingOutlined /> : <PlusOutlined />} */}
+                        <div style={{ marginTop: 8 }}>Upload</div>
+                      </div>
+                    )}
                   </Upload>
                 );
               }}
@@ -390,6 +514,7 @@ const SiteCreate = () => {
             <Controller
               name="status"
               control={control}
+              rules={{ required: `This field is required` }}
               defaultValue={"running"}
               render={({ field }) => (
                 <Select
@@ -493,26 +618,29 @@ const SiteCreate = () => {
               )}
             />
           </Form.Item>
-          {/* <Form.Item label="Warnings">
-  <Controller
-    name="warnings"
-    control={control}
-    defaultValue={[]}
-    render={({ field }) => (
-      <Select
-        {...field}
-        mode="tags"
-        // style={{ width: "100%" }}
-        // onChange={handleChange}
-        tokenSeparators={[","]}
-      >
-        {warningOptions.map((tag, i) => (
-          <Option key={tag}>{tag}</Option>
-        ))}
-      </Select>
-    )}
-  />
-</Form.Item> */}
+          <Form.Item label="Warnings">
+            <Controller
+              name="warnings"
+              control={control}
+              defaultValue={[]}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  mode="multiple"
+                  onChange={(e) => {
+                    console.log("e", e);
+                    return field.onChange(e);
+                  }}
+                  // style={{ width: "100%" }}
+                  tokenSeparators={[","]}
+                >
+                  {warningOptions.map((tag, i) => (
+                    <Option key={tag}>{tag}</Option>
+                  ))}
+                </Select>
+              )}
+            />
+          </Form.Item>
           <Form.Item label="Owner">
             <Controller
               name="owner.name"
@@ -535,68 +663,30 @@ const SiteCreate = () => {
               name="location"
               control={control}
               defaultValue=""
-              render={({ field }) => (
-                <Select
-                  // style={{ width: 240 }}
-                  {...field}
-                  allowClear
-                  // placeholder="custom dropdown render"
-                  dropdownRender={(menu) => (
-                    <div>
-                      {menu}
-                      <Divider style={{ margin: "4px 0" }} />
-                      <div
-                        style={{
-                          display: "flex",
-                          flexWrap: "nowrap",
-                          padding: 8,
-                        }}
-                      >
-                        <Controller
-                          name="location"
-                          control={control}
-                          defaultValue=""
-                          render={({ field }) => (
-                            <Input placeholder="location" {...field} />
-                          )}
-                        />
-                        {/* <a
-        style={{
-          flex: "none",
-          padding: "8px",
-          display: "block",
-          cursor: "pointer",
-        }}
-        // onClick={this.addItem}
-      >
-        <PlusOutlined /> Add location
-      </a> */}
-                      </div>
-                    </div>
-                  )}
-                >
-                  {locationOptions.map((item) => (
-                    <Option key={item}>{item}</Option>
-                  ))}
-                </Select>
-              )}
+              render={({ field }) => <Input {...field} />}
             />
           </Form.Item>
         </Col>
       </Row>
       <Row justify="end">
-        <Button
-          // loading={loading}
-          onClick={handleSubmit(onSubmit)}
-        >
-          Submit
-        </Button>
-        {/* <Button
-          // loading={loading}
-          onClick={}
-        >
-          test
-        </Button> */}
+        <Space>
+          {siteId && (
+            <Popover
+              content={<Button onClick={() => siteRemove()}>Yeah</Button>}
+              title="For real?"
+              trigger="click"
+              visible={visible}
+              onVisibleChange={() => setVisible((visible) => !visible)}
+            >
+              <Button loading={loading} danger>
+                Remove
+              </Button>
+            </Popover>
+          )}
+          <Button loading={loading} onClick={handleSubmit(onSubmit)}>
+            {siteId ? "Edit" : "Create"}
+          </Button>
+        </Space>
       </Row>
     </Form>
   );

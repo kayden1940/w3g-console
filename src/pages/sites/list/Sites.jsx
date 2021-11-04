@@ -9,11 +9,9 @@ import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 const Sites = () => {
-  const { sites } = useStoreProps(["sites"]);
-  // const [siteList, setSiteList] = useState([]);
   const history = useHistory();
-  const { sitesData } = useSites();
-  const siteList = sitesData?.data?.data ?? [];
+  const { data: rawSitesData } = useSites();
+  const [sitesData, setSitesData] = useState([]);
 
   const IconText = ({ icon, text }) => (
     <Space>
@@ -21,13 +19,13 @@ const Sites = () => {
       {text}
     </Space>
   );
-
+  // className={styles.debug}
   return (
     <Row justify="center" gutter={[16, 16]}>
-      <Col span={16} className={styles.debug}>
-        <Filter />
+      <Col span={16}>
+        <Filter setSitesData={setSitesData} rawSitesData={rawSitesData} />
       </Col>
-      <Col span={16} className={styles.debug}>
+      <Col span={16}>
         <List
           itemLayout="vertical"
           size="large"
@@ -37,7 +35,7 @@ const Sites = () => {
           //   },
           //   pageSize: 3,
           // }}
-          dataSource={siteList}
+          dataSource={sitesData}
           // footer={
           //   <div>
           //     <b>ant design</b> footer part
@@ -55,11 +53,11 @@ const Sites = () => {
                   >
                     Edit
                   </Button>,
-                  <IconText
-                    icon={HeartOutlined}
-                    text="156"
-                    key="list-vertical-star-o"
-                  />,
+                  // <IconText
+                  //   icon={HeartOutlined}
+                  //   text="156"
+                  //   key="list-vertical-star-o"
+                  // />,
                   // <IconText
                   //   icon={FileTextOutlined}
                   //   text="2"
@@ -81,7 +79,16 @@ const Sites = () => {
                       {site.name.en}
                     </a>
                   }
-                  description={site.description}
+                  description={
+                    <>
+                      <p style={{ color: "#5b5b5b" }}>{site.description}</p>
+                      <p>
+                        {site.purposes.join(", ")}
+                        {site.topics.length > 0 && `, `}
+                        {site.topics.join(", ")}
+                      </p>
+                    </>
+                  }
                 />
               </List.Item>
             </Card>

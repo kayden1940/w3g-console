@@ -1,22 +1,42 @@
 import useSWR from "swr";
 import { useStoreProps } from "../hooks/store";
 
-
 const useSites = () => {
   const { setSites } = useStoreProps(["setSites"]);
   // fetch site data and store them.
-  const { data, error } = useSWR(
+  const { data, error, mutate } = useSWR(
     `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites`,
     (...args) => fetch(...args).then((res) => res.json())
   );
 
-  setSites(data);
+  setSites(data?.data?.data);
+  console.log("sites", data?.data?.data);
 
   return {
-    sitesData: data,
+    data: data?.data?.data,
     isLoading: !error && !data,
     isError: error,
+    mutate: mutate,
   };
 };
 
-export { useSites };
+const useStats = () => {
+  const { setStats } = useStoreProps(["setStats"]);
+  // fetch site data and store them.
+  const { data, error, mutate } = useSWR(
+    `${process.env.REACT_APP_API_ROOT_URL}/api/v1/stats`,
+    (...args) => fetch(...args).then((res) => res.json())
+  );
+  console.log("stats", data?.data);
+
+  setStats(data?.data);
+
+  return {
+    data: data?.data,
+    isLoading: !error && !data,
+    isError: error,
+    mutate: mutate,
+  };
+};
+
+export { useSites, useStats };

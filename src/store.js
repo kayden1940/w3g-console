@@ -6,6 +6,7 @@ export const useStore = create((set) => ({
   me: null,
 
   sites: [],
+  stats: [],
   tasks: [],
 
   // actions
@@ -16,5 +17,6 @@ export const useStore = create((set) => ({
   setMe: (me) => set(() => ({ me })),
 
   setSites: (sites) => set(() => ({ sites })),
+  setStats: (stats) => set(() => ({ stats })),
   setTasks: (tasks) => set(() => ({ tasks })),
 }));
