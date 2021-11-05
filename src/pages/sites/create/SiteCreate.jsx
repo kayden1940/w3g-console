@@ -14,6 +14,7 @@ import {
   Space,
   message,
   Upload,
+  Typography,
   Popover,
 } from "antd";
 import { useLocation } from "react-router-dom";
@@ -47,6 +48,7 @@ const SiteCreate = () => {
     setValue,
   } = useForm();
 
+  const { Text, Link } = Typography;
   const { TextArea } = Input;
   const { Option } = Select;
   const location = useLocation();
@@ -185,7 +187,6 @@ const SiteCreate = () => {
         url: `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites/${siteId}`,
       };
       const removeResult = await axios(options);
-      console.log("removeResult", removeResult);
       if (removeResult?.status.toString().startsWith("2")) {
         setLoading(false);
         message.success({
@@ -666,6 +667,13 @@ const SiteCreate = () => {
               render={({ field }) => <Input {...field} />}
             />
           </Form.Item>
+          {siteId && fetchedSite && (
+            <>
+              <Form.Item label="Create by">
+                <Text>{fetchedSite.created.by.name}</Text>
+              </Form.Item>
+            </>
+          )}
         </Col>
       </Row>
       <Row justify="end">

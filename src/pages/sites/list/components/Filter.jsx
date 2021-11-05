@@ -39,7 +39,7 @@ const PurposesFilter = ({ selectedPurposes, setSelectedPurposes }) => {
 const TopicFilter = ({ selectedTopics, setSelectedTopics }) => {
   const { data: statsData } = useStats();
   const { CheckableTag } = Tag;
-  // FIXME: tagsData should fetch from apis, and now that the data from apis are needed from everywhere, gonna store the results to global state.
+
   const tagsData =
     statsData?.sites?.topics?.map(({ _id, count }) => `${_id}(${count})`) ?? [];
 
@@ -115,8 +115,6 @@ const Filter = ({ setSitesData, rawSitesData }) => {
             ...selectedTopics,
           ].join(",,");
           const siteTags = [...(site?.purposes ?? []), ...(site?.topics ?? [])];
-          // console.log("siteTagsString", siteTagsString);
-          console.log("selectedTagsString", selectedTagsString);
           if (new RegExp(siteTags.join("|")).test(selectedTagsString)) {
             result.push(site);
           }
@@ -128,8 +126,12 @@ const Filter = ({ setSitesData, rawSitesData }) => {
   }, [rawSitesData, selectedPurposes, selectedTopics]);
 
   const onSearch = (e) => {
-    if (!e) return;
-    // setSitesData
+    if (!e) return setSitesData(rawSitesData);
+    setSitesData((sitesData) => {
+      return sitesData.filter((site) => {
+        return site.name.en.toLowerCase().includes(e.toLowerCase());
+      });
+    });
   };
 
   return (
@@ -139,13 +141,13 @@ const Filter = ({ setSitesData, rawSitesData }) => {
           <Col span={24}>
             <Search placeholder="Search by title" onSearch={onSearch} />
           </Col>
-          <Col>
+          <Col span={24}>
             <PurposesFilter
               selectedPurposes={selectedPurposes}
               setSelectedPurposes={setSelectedPurposes}
             />
           </Col>
-          <Col>
+          <Col span={24}>
             <TopicFilter
               selectedTopics={selectedTopics}
               setSelectedTopics={setSelectedTopics}

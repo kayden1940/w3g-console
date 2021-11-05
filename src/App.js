@@ -38,7 +38,6 @@ const PrivateRoute = ({ children, ...rest }) => {
     }),
     shallow
   );
-
   return authed ? (
     <Route {...rest} />
   ) : (
@@ -54,26 +53,32 @@ const App = () => {
   return (
     <div className="App">
       <Router>
-        <PublicRoute path="/login">
-          <Login />
-        </PublicRoute>
         <Switch>
+          <PublicRoute path="/login">
+            <Login />
+          </PublicRoute>
           <AppLayout>
-            <PrivateRoute exact path="/">
-              <Dashboard />
-            </PrivateRoute>
-            <Route
+            <PrivateRoute
+              exact
+              path="/"
+              render={({ match: { url } }) => <Dashboard />}
+            />
+            <PrivateRoute
               path="/sites"
               render={({ match: { url } }) => (
                 <>
-                  <Route path={`${url}/`} component={Sites} exact />
+                  <PrivateRoute path={`${url}/`} component={Sites} exact />
                   <Switch>
-                    <Route
+                    <PrivateRoute
                       path={`${url}/create`}
                       component={SiteCreate}
                       exact
                     />
-                    <Route path={`${url}/:id`} component={SiteCreate} exact />
+                    <PrivateRoute
+                      path={`${url}/:id`}
+                      component={SiteCreate}
+                      exact
+                    />
                   </Switch>
                 </>
               )}

@@ -1,8 +1,11 @@
 // import Menu from "./Menu/Menu";
 import { Layout, Menu } from "antd";
 import { Link, useHistory } from "react-router-dom";
+import { useStoreProps } from "../../hooks/store";
+import axios from "axios";
 const AppLayout = ({ children }) => {
   const { Content, Sider } = Layout;
+  const { me } = useStoreProps(["me"]);
   const history = useHistory();
 
   return (
@@ -34,7 +37,7 @@ const AppLayout = ({ children }) => {
               Create
             </Menu.Item>
           </Menu.ItemGroup>
-          <Menu.Item>
+          {/* <Menu.Item>
             <Link to="/tasks">Tasks</Link>
           </Menu.Item>
           <Menu.Item>
@@ -42,6 +45,28 @@ const AppLayout = ({ children }) => {
           </Menu.Item>
           <Menu.Item>
             <Link to="/operators">Operators</Link>
+          </Menu.Item> */}
+          <Menu.Item
+            title=""
+            style={{
+              position: "absolute",
+              bottom: 0,
+              zIndex: 1,
+              transition: "all 0.2s",
+            }}
+            onClick={async () => {
+              await axios({
+                method: "GET",
+                headers: {
+                  authorization: `Bearer ${me.token}`,
+                },
+                url: `${process.env.REACT_APP_API_ROOT_URL}/api/v1/operators/logout`,
+                withCredentials: true,
+              });
+              history.go(0);
+            }}
+          >
+            Logout
           </Menu.Item>
         </Menu>
       </Sider>

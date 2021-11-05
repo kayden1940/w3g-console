@@ -10,7 +10,6 @@ const useSites = () => {
   );
 
   setSites(data?.data?.data);
-  console.log("sites", data?.data?.data);
 
   return {
     data: data?.data?.data,
@@ -27,7 +26,6 @@ const useStats = () => {
     `${process.env.REACT_APP_API_ROOT_URL}/api/v1/stats`,
     (...args) => fetch(...args).then((res) => res.json())
   );
-  console.log("stats", data?.data);
 
   setStats(data?.data);
 

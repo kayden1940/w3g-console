@@ -37,7 +37,7 @@ const Dashboard = () => {
   //     shallow
   //   );
 
-  return <h1>Dashboard</h1>;
+  return <h1>Dashboard, todo: stats and cool graph to show here.</h1>;
 };
 
 export default Dashboard;

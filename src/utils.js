@@ -14,7 +14,6 @@ const buildFormData = (formData, data, parentKey) => {
     !(data instanceof File)
   ) {
     Object.keys(data).forEach((key) => {
-      console.log("data[key]", data[key]);
       buildFormData(
         formData,
         data[key],
