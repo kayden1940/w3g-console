@@ -70,8 +70,8 @@ const SiteCreate = () => {
       reset({
         ...fetchedSite,
         ...(fetchedSite?.imageCover &&
-          !`${process.env.REACT_APP_API_ROOT_URL}`.includes(
-            fetchedSite?.imageCover
+          !`${fetchedSite?.imageCover}`.includes(
+            process.env.REACT_APP_API_ROOT_URL
           ) && {
             imageCover: `${process.env.REACT_APP_API_ROOT_URL}/images/sites/${fetchedSite.imageCover}`,
           }),
@@ -211,12 +211,15 @@ const SiteCreate = () => {
       at: Date.now(),
       by: me.data.operator._id,
     };
-
-    if (
-      data?.imageCover &&
-      !`${process.env.REACT_APP_API_ROOT_URL}`.includes(data.imageCover)
-    ) {
-      data.imageCover = await base64ToFile(data.imageCover);
+    if (data?.imageCover) {
+      if (`${data.imageCover}`.includes(process.env.REACT_APP_API_ROOT_URL)) {
+        data.imageCover = data.imageCover.replace(
+          `${process.env.REACT_APP_API_ROOT_URL}/images/sites/`,
+          ""
+        );
+      } else {
+        data.imageCover = await base64ToFile(data.imageCover);
+      }
     }
     const formData = jsonToFormData(data);
     if (siteId) {
@@ -619,29 +622,6 @@ const SiteCreate = () => {
               )}
             />
           </Form.Item>
-          <Form.Item label="Warnings">
-            <Controller
-              name="warnings"
-              control={control}
-              defaultValue={[]}
-              render={({ field }) => (
-                <Select
-                  {...field}
-                  mode="multiple"
-                  onChange={(e) => {
-                    console.log("e", e);
-                    return field.onChange(e);
-                  }}
-                  // style={{ width: "100%" }}
-                  tokenSeparators={[","]}
-                >
-                  {warningOptions.map((tag, i) => (
-                    <Option key={tag}>{tag}</Option>
-                  ))}
-                </Select>
-              )}
-            />
-          </Form.Item>
           <Form.Item label="Owner">
             <Controller
               name="owner.name"
@@ -658,7 +638,29 @@ const SiteCreate = () => {
               render={({ field }) => <Input placeholder="" {...field} />}
             />
           </Form.Item>
-
+          <Form.Item label="Warnings">
+            <Controller
+              name="warnings"
+              control={control}
+              defaultValue={[]}
+              render={({ field }) => (
+                <Select
+                  {...field}
+                  mode="tags"
+                  onChange={(e) => {
+                    console.log("e", e);
+                    return field.onChange(e);
+                  }}
+                  // style={{ width: "100%" }}
+                  tokenSeparators={[","]}
+                >
+                  {warningOptions.map((tag, i) => (
+                    <Option key={tag}>{tag}</Option>
+                  ))}
+                </Select>
+              )}
+            />
+          </Form.Item>
           <Form.Item label="Location">
             <Controller
               name="location"
