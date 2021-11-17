@@ -8,20 +8,28 @@ import { useStoreProps } from "../../../hooks/store";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
+const IconText = ({ icon, text }) => (
+  <Space>
+    {React.createElement(icon)}
+    {text}
+  </Space>
+);
+
+const getSortedSites = (list) => {
+  if (!list) return [];
+  return list.sort((a, b) => {
+    if (!a?.name) return;
+    return a.name.en.localeCompare(b.name.en);
+  });
+};
+
 const Sites = () => {
   const history = useHistory();
   const { data: rawSitesData } = useSites();
   const [sitesData, setSitesData] = useState([]);
 
-  const IconText = ({ icon, text }) => (
-    <Space>
-      {React.createElement(icon)}
-      {text}
-    </Space>
-  );
-  // className={styles.debug}
   return (
-    <Row justify="center" gutter={[16, 16]}>
+    <Row justify="center" gutter={[14, 14]} style={{ maxWidth: "95%" }}>
       <Col span={16}>
         <Filter setSitesData={setSitesData} rawSitesData={rawSitesData} />
       </Col>
@@ -35,7 +43,7 @@ const Sites = () => {
           //   },
           //   pageSize: 3,
           // }}
-          dataSource={sitesData}
+          dataSource={getSortedSites(sitesData)}
           // footer={
           //   <div>
           //     <b>ant design</b> footer part

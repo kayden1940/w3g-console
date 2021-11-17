@@ -2,65 +2,63 @@ import React, { useState, useMemo, useEffect } from "react";
 // import { useSites } from "../../../hooks/apis";
 import { Tag, Input, Row, Col, Card } from "antd";
 import { useStats } from "../../../../hooks/apis";
+import { getSortedList } from "../../../../utils";
 
 const PurposesFilter = ({ selectedPurposes, setSelectedPurposes }) => {
   const { data: statsData } = useStats();
   const { CheckableTag } = Tag;
-
-  const tagsData =
-    statsData?.sites?.purposes?.map(({ _id, count }) => `${_id}(${count})`) ??
-    [];
+  const purposes = statsData?.sites?.purposes[0] ?? {};
   return (
     <>
       <span style={{ marginRight: 8 }}>Purposes:</span>
-      {tagsData.map((tag) => (
+      {getSortedList(Object.keys(purposes)).map((purpose) => (
         <CheckableTag
-          key={tag}
-          checked={selectedPurposes.indexOf(tag) > -1}
+          key={purpose}
+          checked={selectedPurposes.indexOf(purpose) > -1}
           onChange={(checked) => {
             if (checked) {
               setSelectedPurposes((selectedPurposes) => [
                 ...selectedPurposes,
-                tag,
+                purpose,
               ]);
             } else {
               setSelectedPurposes((selectedPurposes) =>
-                [...selectedPurposes].filter((t) => t !== tag)
+                [...selectedPurposes].filter((t) => t !== purpose)
               );
             }
           }}
         >
-          {tag}
+          {`${purpose}(${purposes[purpose]})`}
         </CheckableTag>
       ))}
     </>
   );
 };
+
 const TopicFilter = ({ selectedTopics, setSelectedTopics }) => {
   const { data: statsData } = useStats();
   const { CheckableTag } = Tag;
 
-  const tagsData =
-    statsData?.sites?.topics?.map(({ _id, count }) => `${_id}(${count})`) ?? [];
+  const topics = statsData?.sites?.topics[0] ?? {};
 
   return (
     <>
       <span style={{ marginRight: 8 }}>Topics:</span>
-      {tagsData.map((tag) => (
+      {getSortedList(Object.keys(topics)).map((topic) => (
         <CheckableTag
-          key={tag}
-          checked={selectedTopics.indexOf(tag) > -1}
+          key={topic}
+          checked={selectedTopics.indexOf(topic) > -1}
           onChange={(checked) => {
             if (checked) {
-              setSelectedTopics((selectedTopics) => [...selectedTopics, tag]);
+              setSelectedTopics((selectedTopics) => [...selectedTopics, topic]);
             } else {
               setSelectedTopics((selectedTopics) =>
-                [...selectedTopics].filter((t) => t !== tag)
+                [...selectedTopics].filter((t) => t !== topic)
               );
             }
           }}
         >
-          {tag}
+          {`${topic}(${topics[topic]})`}
         </CheckableTag>
       ))}
     </>

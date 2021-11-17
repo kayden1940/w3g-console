@@ -1,5 +1,9 @@
 import { useStore } from "../src/store";
 
+const getSortedList = (list) => {
+  return list.sort((a, b) => a.localeCompare(b));
+};
+
 const validateEmail = (email) => {
   const re =
     /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -65,4 +69,10 @@ const base64ToFile = async (base64, fileName) => {
 //   return color;
 // };
 
-export { validateEmail, jsonToFormData, fileToBase64, base64ToFile };
+export {
+  validateEmail,
+  jsonToFormData,
+  fileToBase64,
+  base64ToFile,
+  getSortedList,
+};

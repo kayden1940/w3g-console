@@ -13,6 +13,7 @@ import { useStore } from "./store";
 import shallow from "zustand/shallow";
 import AppLayout from "./components/layout/AppLayout";
 import Login from "./pages/login/Login";
+import Signup from "./pages/signup/Signup";
 import Dashboard from "./pages/dashboard/Dashboard";
 import Operators from "./pages/operators/Operators";
 import Guests from "./pages/guests/Guests";
@@ -56,6 +57,9 @@ const App = () => {
         <Switch>
           <PublicRoute path="/login">
             <Login />
+          </PublicRoute>
+          <PublicRoute path="/signup">
+            <Signup />
           </PublicRoute>
           <AppLayout>
             <PrivateRoute

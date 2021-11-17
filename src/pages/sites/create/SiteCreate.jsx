@@ -16,13 +16,19 @@ import {
   Upload,
   Typography,
   Popover,
+  AutoComplete,
 } from "antd";
 import { useLocation } from "react-router-dom";
 import { useStats } from "../../../hooks/apis";
 // import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { useForm, Controller } from "react-hook-form";
 import { useStoreProps } from "../../../hooks/store";
-import { jsonToFormData, fileToBase64, base64ToFile } from "../../../utils";
+import {
+  jsonToFormData,
+  fileToBase64,
+  base64ToFile,
+  getSortedList,
+} from "../../../utils";
 // import useAuth from "../../hooks/auth";
 // import { useStore } from "../../store";
 // import shallow from "zustand/shallow";
@@ -53,6 +59,23 @@ const SiteCreate = () => {
   const { Option } = Select;
   const location = useLocation();
   const { data } = useStats();
+  const myRole = me?.data?.operator?.role;
+
+  let languageStats = {};
+  let locationTags = [];
+  let purposeStats = {};
+  let topicStats = {};
+  let warningStats = {};
+
+  if (!!data?.sites) {
+    const { languages, locations, purposes, topics, warnings } = data.sites;
+    languageStats = languages[0];
+    locationTags = locations;
+    purposeStats = purposes[0];
+    topicStats = topics[0];
+    warningStats = warnings[0];
+  }
+
   const siteId = location.state?.siteId;
 
   const [fetchedSite, setFetchedSite] = useState(null);
@@ -78,14 +101,7 @@ const SiteCreate = () => {
       });
     }
   }, [fetchedSite]);
-  const purposeTags =
-    statsData?.sites?.purposes?.map(({ _id }) => `${_id}`) ?? [];
-  const topicTags = statsData?.sites?.topics?.map(({ _id }) => `${_id}`) ?? [];
-  const languageTags = [
-    "English",
-    "Tranditional Chinese",
-    "Simplified Chinese",
-  ];
+
   const accessibilityOptions = ["full", "membership", "memberOnly", "private"];
   const ownershipOptions = [
     "personal",
@@ -97,7 +113,6 @@ const SiteCreate = () => {
     "decentral",
     "unknown",
   ];
-  const locationOptions = ["Hong Kong", "United Kingdom", "United States"];
   const siteStatusOptions = ["suspend", "running", "archive"];
   const profitabilityOptions = [
     "free",
@@ -105,7 +120,6 @@ const SiteCreate = () => {
     "freeWithPay",
     "payOnly",
   ];
-  const warningOptions = ["flashing", "adult", "nsfw"];
 
   const history = useHistory();
 
@@ -360,15 +374,12 @@ const SiteCreate = () => {
               // rules={{ required: `This field is required` }}
               defaultValue={["English"]}
               render={({ field }) => (
-                <Select
-                  {...field}
-                  mode="tags"
-                  // style={{ width: "100%" }}
-                  // onChange={handleChange}
-                  tokenSeparators={[","]}
-                >
-                  {languageTags.map((tag, i) => (
-                    <Option key={tag}>{tag}</Option>
+                <Select {...field} mode="tags" tokenSeparators={[","]}>
+                  {(Object.keys(languageStats) ?? []).map((language, i) => (
+                    <Option
+                      key={language}
+                      value={language}
+                    >{`${language}(${languageStats[language]})`}</Option>
                   ))}
                 </Select>
               )}
@@ -428,9 +439,13 @@ const SiteCreate = () => {
                   // onChange={handleChange}
                   tokenSeparators={[","]}
                 >
-                  {purposeTags.map((tag, i) => (
-                    <Option key={tag}>{tag}</Option>
-                  ))}
+                  {getSortedList(Object.keys(purposeStats)).map(
+                    (purpose, i) => (
+                      <Option key={purpose} value={purpose}>
+                        {`${purpose}(${purposeStats[purpose]})`}
+                      </Option>
+                    )
+                  )}
                 </Select>
               )}
             />
@@ -448,8 +463,11 @@ const SiteCreate = () => {
                   // onChange={handleChange}
                   tokenSeparators={[","]}
                 >
-                  {topicTags.map((tag, i) => (
-                    <Option key={tag}>{tag}</Option>
+                  {getSortedList(Object.keys(topicStats)).map((topic, i) => (
+                    <Option
+                      key={topic}
+                      value={topic}
+                    >{`${topic}(${topicStats[topic]})`}</Option>
                   ))}
                 </Select>
               )}
@@ -654,8 +672,10 @@ const SiteCreate = () => {
                   // style={{ width: "100%" }}
                   tokenSeparators={[","]}
                 >
-                  {warningOptions.map((tag, i) => (
-                    <Option key={tag}>{tag}</Option>
+                  {getSortedList(Object.keys(warningStats)).map((warning) => (
+                    <Option key={warning} value={warning}>
+                      {`${warning}(${warningStats[warning]})`}
+                    </Option>
                   ))}
                 </Select>
               )}
@@ -666,7 +686,14 @@ const SiteCreate = () => {
               name="location"
               control={control}
               defaultValue=""
-              render={({ field }) => <Input {...field} />}
+              render={({ field }) => (
+                <AutoComplete
+                  {...field}
+                  options={getSortedList(locationTags).map((location) => ({
+                    value: location,
+                  }))}
+                />
+              )}
             />
           </Form.Item>
           {siteId && fetchedSite && (
@@ -680,7 +707,7 @@ const SiteCreate = () => {
       </Row>
       <Row justify="end">
         <Space>
-          {siteId && (
+          {siteId && myRole == "admin" && (
             <Popover
               content={<Button onClick={() => siteRemove()}>Yeah</Button>}
               title="For real?"

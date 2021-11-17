@@ -11,19 +11,23 @@ const AppLayout = ({ children }) => {
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
-        // style={{
-        //   overflow: "auto",
-        //   height: "100vh",
-        //   // position: "fixed",
-        //   // width: "100%",
-        //   left: 0,
-        // }}
+        style={{
+          //   overflow: "auto",
+          //   height: "100vh",
+          //   // position: "fixed",
+          width: "100%",
+          //   left: 0,
+        }}
         theme="light"
       >
         <Menu
           selectable={false}
           // className={styles.debug}
-          // style={{ height: "100%", position: "fixed" }}
+          style={{
+            height: "100%",
+            width: "100%",
+            // position: "fixed",
+          }}
           // theme="dark"
           // defaultSelectedKeys={["1"]}
           // defaultOpenKeys={["sub1"]}
@@ -49,10 +53,10 @@ const AppLayout = ({ children }) => {
           <Menu.Item
             title=""
             style={{
-              position: "absolute",
               bottom: 0,
               zIndex: 1,
               transition: "all 0.2s",
+              position: "fixed",
             }}
             onClick={async () => {
               await axios({
