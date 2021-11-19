@@ -6,13 +6,16 @@ const useSites = () => {
   // fetch site data and store them.
   const { data, error, mutate } = useSWR(
     `${process.env.REACT_APP_API_ROOT_URL}/api/v1/sites`,
-    (...args) => fetch(...args).then((res) => res.json())
+    (...args) =>
+      fetch(...args)
+        .then((res) => res.json())
+        .then((res) => res?.data?.data ?? [])
   );
 
-  setSites(data?.data?.data);
+  setSites(data);
 
   return {
-    data: data?.data?.data,
+    data: data,
     isLoading: !error && !data,
     isError: error,
     mutate: mutate,

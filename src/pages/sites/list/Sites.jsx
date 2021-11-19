@@ -8,14 +8,15 @@ import { useStoreProps } from "../../../hooks/store";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
-const IconText = ({ icon, text }) => (
-  <Space>
-    {React.createElement(icon)}
-    {text}
-  </Space>
-);
+// const IconText = ({ icon, text }) => (
+//   <Space>
+//     {React.createElement(icon)}
+//     {text}
+//   </Space>
+// );
 
 const getSortedSites = (list) => {
+  // fixme: sort at api
   if (!list) return [];
   return list.sort((a, b) => {
     if (!a?.name) return;
@@ -29,7 +30,15 @@ const Sites = () => {
   const [sitesData, setSitesData] = useState([]);
 
   return (
-    <Row justify="center" gutter={[14, 14]} style={{ maxWidth: "95%" }}>
+    <Row
+      justify="center"
+      gutter={[14, 14]}
+      style={{
+        maxWidth: "100%",
+        overflow: "auto",
+        height: "100vh",
+      }}
+    >
       <Col span={16}>
         <Filter setSitesData={setSitesData} rawSitesData={rawSitesData} />
       </Col>

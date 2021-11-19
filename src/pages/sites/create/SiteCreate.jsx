@@ -22,6 +22,7 @@ import { useLocation } from "react-router-dom";
 import { useStats } from "../../../hooks/apis";
 // import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
 import { useForm, Controller } from "react-hook-form";
+import useSWR from "swr";
 import { useStoreProps } from "../../../hooks/store";
 import {
   jsonToFormData,
