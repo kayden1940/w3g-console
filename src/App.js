@@ -15,7 +15,7 @@ import AppLayout from "./components/layout/AppLayout";
 import Login from "./pages/login/Login";
 import Signup from "./pages/signup/Signup";
 import Dashboard from "./pages/dashboard/Dashboard";
-import Operators from "./pages/operators/Operators";
+import Operators from "./pages/operators/list/Operators";
 import Guests from "./pages/guests/Guests";
 import Tasks from "./pages/tasks/Tasks";
 
