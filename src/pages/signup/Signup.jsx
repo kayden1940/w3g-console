@@ -22,9 +22,7 @@ const Signup = () => {
   } = useForm();
 
   const onSubmit = async (data) => {
-    console.log("data", data);
     const authResult = await signup(data);
-    console.log("authResult", authResult);
     if (!authResult) {
       // setError("email");
       // setError("password");
