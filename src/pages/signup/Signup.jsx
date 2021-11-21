@@ -24,14 +24,14 @@ const Signup = () => {
   const onSubmit = async (data) => {
     const authResult = await signup(data);
     if (!authResult) {
-      // setError("email");
-      // setError("password");
-      // setTimeout(() => {
-      //   clearErrors();
-      // }, 700);
+      setError("email");
+      setError("password");
+      setTimeout(() => {
+        clearErrors();
+      }, 700);
     }
   };
-  console.log("errors", errors);
+  // console.log("errors", errors);
 
   const { loading } = useStore(
     (state) => ({
