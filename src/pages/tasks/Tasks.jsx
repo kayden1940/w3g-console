@@ -43,10 +43,14 @@ const Tasks = () => {
             by: me.data.operator._id,
           },
         },
-        { withCredentials: true }
+        {
+          headers: {
+            authorization: `Bearer ${me.token}`,
+          },
+          withCredentials: true,
+        }
       );
       setLoading(false);
-      console.log("Date.now()", Date.now());
       if (result?.data?.status === "success") {
         mutate();
       }
@@ -62,12 +66,18 @@ const Tasks = () => {
   const taskRemove = async (taskId) => {
     try {
       setLoading(true);
+
       const result = await axios.delete(
         `${process.env.REACT_APP_API_ROOT_URL}/api/v1/tasks/${taskId}`,
-        { withCredentials: true }
+        {
+          headers: {
+            authorization: `Bearer ${me.token}`,
+          },
+          withCredentials: true,
+        }
       );
       setLoading(false);
-      console.log("result", result);
+      // console.log("result", result);
       if (`${result?.status}`.startsWith("2")) {
         message.success({
           content: "Removed!",

@@ -41,7 +41,12 @@ const Operators = () => {
             role: updateValue == "admin" ? "staff" : "admin",
           }),
         },
-        { withCredentials: true }
+        {
+          headers: {
+            authorization: `Bearer ${me.token}`,
+          },
+          withCredentials: true,
+        }
       );
       setLoading(false);
       if (result?.data?.status === "success") {
@@ -65,7 +70,12 @@ const Operators = () => {
       setLoading(true);
       const result = await axios.delete(
         `${process.env.REACT_APP_API_ROOT_URL}/api/v1/operators/${operatorId}`,
-        { withCredentials: true }
+        {
+          headers: {
+            authorization: `Bearer ${me.token}`,
+          },
+          withCredentials: true,
+        }
       );
       setLoading(false);
       if (`${result?.status}`.startsWith("2")) {
