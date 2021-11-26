@@ -36,11 +36,13 @@ const Sites = () => {
       style={{
         maxWidth: "100%",
         overflow: "auto",
-        height: "100vh",
       }}
     >
       <Col span={16}>
-        <Filter setSitesData={setSitesData} rawSitesData={rawSitesData} />
+        <Filter
+          setSitesData={setSitesData}
+          rawSitesData={rawSitesData}
+        />
       </Col>
       <Col span={16}>
         <List
