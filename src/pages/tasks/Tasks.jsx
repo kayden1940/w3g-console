@@ -4,6 +4,7 @@ import useSWR from "swr";
 import { useStoreProps } from "../../hooks/store";
 import { useHistory } from "react-router-dom";
 import axios from "axios";
+import dayjs from "dayjs";
 // import { useForm, Controller } from "react-hook-form";
 // import useAuth from "../../hooks/auth";
 // import { useStore } from "../../store";
@@ -121,9 +122,9 @@ const Tasks = () => {
           //   </div>
           // }
           renderItem={(task) => {
-            const ISSUED_DATE = `${new Date(task.date).getDay()}-${new Date(
-              task.date
-            ).getMonth()}-${new Date(task.date).getFullYear()}`;
+            const ISSUED_DATE = `${dayjs(task.date).format(
+              "MMM D, YYYY h:mm A"
+            )}`;
             return (
               <Card>
                 <List.Item
