@@ -697,7 +697,7 @@ const SiteCreate = () => {
               )}
             />
           </Form.Item>
-          {siteId && fetchedSite && (
+          {siteId && fetchedSite?.created?.by?.name && (
             <>
               <Form.Item label="Create by">
                 <Text>{fetchedSite.created.by.name}</Text>
