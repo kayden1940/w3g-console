@@ -8,6 +8,7 @@ const AppLayout = ({ children }) => {
   const { me } = useStoreProps(["me"]);
   const history = useHistory();
   const myRole = me?.data?.operator?.role;
+  const activated = me?.data?.operator?.active;
   return (
     <Layout style={{ minHeight: "100vh" }}>
       <Sider
@@ -31,9 +32,11 @@ const AppLayout = ({ children }) => {
           <Menu.Item>
             <Link to="/">w3g-console</Link>
           </Menu.Item>
-          <Menu.Item>
-            <Link to="/tasks">Tasks</Link>
-          </Menu.Item>
+          {activated && (
+            <Menu.Item>
+              <Link to="/tasks">Tasks</Link>
+            </Menu.Item>
+          )}
           {myRole == "admin" && (
             <Menu.Item>
               <Link to="/operators">Operators</Link>
@@ -41,9 +44,11 @@ const AppLayout = ({ children }) => {
           )}
           <Menu.ItemGroup title="Sites">
             <Menu.Item onClick={() => history.push(`/sites`)}>List</Menu.Item>
-            <Menu.Item onClick={() => history.push(`/sites/create`)}>
-              Create
-            </Menu.Item>
+            {activated && (
+              <Menu.Item onClick={() => history.push(`/sites/create`)}>
+                Create
+              </Menu.Item>
+            )}
           </Menu.ItemGroup>
           {/* <Menu.Item>
             <Link to="/guests">Guests</Link>

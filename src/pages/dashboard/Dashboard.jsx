@@ -52,7 +52,7 @@ const Dashboard = () => {
   const myRole = me?.data?.operator?.role;
   return (
     <>
-      <h1>Dashboard, todo: stats and cool graph to show here.</h1>
+      {/* <h1>Dashboard, todo: stats and cool graph to show here.</h1> */}
       {myRole == "admin" && (
         <>
           <Button
