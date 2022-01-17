@@ -28,6 +28,9 @@ const Sites = () => {
   const history = useHistory();
   const { data: rawSitesData } = useSites();
   const [sitesData, setSitesData] = useState([]);
+  const { me } = useStoreProps(["me"]);
+  const { active } = me.data.operator;
+  console.log("active", active);
 
   return (
     <Row
@@ -39,10 +42,7 @@ const Sites = () => {
       }}
     >
       <Col span={16}>
-        <Filter
-          setSitesData={setSitesData}
-          rawSitesData={rawSitesData}
-        />
+        <Filter setSitesData={setSitesData} rawSitesData={rawSitesData} />
       </Col>
       <Col span={16}>
         <List
@@ -64,25 +64,19 @@ const Sites = () => {
             <Card>
               <List.Item
                 key={site.slug}
-                actions={[
-                  <Button
-                    onClick={() => {
-                      history.push(`/sites/${site._id}`, { siteId: site._id });
-                    }}
-                  >
-                    Edit
-                  </Button>,
-                  // <IconText
-                  //   icon={HeartOutlined}
-                  //   text="156"
-                  //   key="list-vertical-star-o"
-                  // />,
-                  // <IconText
-                  //   icon={FileTextOutlined}
-                  //   text="2"
-                  //   key="list-vertical-message"
-                  // />,
-                ]}
+                {...(active && {
+                  actions: [
+                    <Button
+                      onClick={() => {
+                        history.push(`/sites/${site._id}`, {
+                          siteId: site._id,
+                        });
+                      }}
+                    >
+                      Edit
+                    </Button>,
+                  ],
+                })}
                 extra={
                   <img
                     width={272}
